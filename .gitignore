@@ -1,0 +1,89 @@
+# Visual Studio
+.vs/
+*.vcxproj.user
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build results
+bin/
+obj/
+out/
+publish/
+
+# Rider IDE
+.idea/
+*.sln.iml
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Rider and Resharper caches
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# Visual Studio Code
+.vscode/
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userprefs
+*.dbmdl
+
+# Mono auto generated files
+mono_crash.*
+
+# MSTest test results
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+# NCrunch
+*_NCrunch_*
+.*crunch*
+
+# TeamCity
+.teamcity/
+
+# DotCover
+*.dotCover
+
+# Others
+*.psess
+*.vsp
+*_i.c
+*_p.c
+*_h.h
+*.log
+*.tlog
+*.tmp
+*.cache
+*.ilk
+*.meta
+*.obj
+*.pch
+*.pgc
+*.pgd
+*.rule
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.tmp_proj

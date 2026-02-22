@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="../LIBS/ShadDev.Core.NET/ShadDev.Core.NET.csproj" />
+  <Project Path="ShadScan.Client/ShadScan.Client.csproj" />
+</Solution>
