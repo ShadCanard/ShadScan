@@ -18,7 +18,6 @@
             <ComboBox x:Name="cbScanners" Margin="5" DisplayMemberPath="Name" />
             <StackPanel Orientation="Vertical" Grid.Row="4">
                 <Button Click="OnPreviewScan" Content="Prévisualiser" Margin="5"/>
-                <Button Click="OnScan" Content="Scanner" Margin="5" />
             </StackPanel>
         </Grid>
     </Border>

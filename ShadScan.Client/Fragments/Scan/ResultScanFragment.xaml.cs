@@ -131,7 +131,7 @@ namespace ShadScan.Client.Fragments.Scan
             });
         }
 
-        private void OnSave(object sender, RoutedEventArgs e)
+        private async void OnSave(object sender, RoutedEventArgs e)
         {
             var defaultPath = Instance.GetInstance().GetSettings<ScanSettings>().DefaultFolder;
             var outputPath = Path.Combine(defaultPath, "output");
@@ -149,11 +149,24 @@ namespace ShadScan.Client.Fragments.Scan
             var file = File.OpenWrite(outputFile);
             encoder.Save(file);
 
+            var scanFile = new ScanFile()
+            {
+                PageNumber = 1,
+                Path = outputFile
+            };
+
             Instance.GetInstance().GetRepository<ScanItem>().Add(new ScanItem() { 
                 CreationTime = DateTime.Now, 
                 Name = $"scan_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.png", 
-                Path = outputFile,
+                Files = [.. (new List<ScanFile> { scanFile })],
                 Type = ImageType.UNKNOWN,
+            });
+
+            await this.ShowMessage("Succès", "Scan sauvegardé avec succès !", MessageBoxButton.OK);
+            await Dispatcher.BeginInvoke(() =>
+            {
+                _bitmap = null;
+                imgPreview.Source = null;
             });
         }
     }

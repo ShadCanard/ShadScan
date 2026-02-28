@@ -36,10 +36,5 @@ namespace ShadScan.Client.Fragments.Scan
             Instance.GetInstance().GetFragment<MainScanFragment>().SetMainContent<ResultScanFragment>();
             Instance.GetInstance().GetFragment<ResultScanFragment>().LaunchPreviewScan();
         }
-
-        private void OnScan(object sender, RoutedEventArgs e)
-        {
-
-        }
     }
 }

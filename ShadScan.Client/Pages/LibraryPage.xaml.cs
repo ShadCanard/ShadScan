@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ShadScan.Client.Fragments.Library;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Windows;
@@ -21,6 +22,7 @@ namespace ShadScan.Client.Pages
         public LibraryPage()
         {
             InitializeComponent();
+            ucMain.Content = Instance.GetInstance().GetFragment<FrameLibraryFragment>();
         }
     }
 }

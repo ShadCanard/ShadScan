@@ -7,28 +7,24 @@ using System.Text;
 namespace ShadScan.Client.Models
 {
     [Serializable]
-    [FilePath(@"{DATA}\categories.json", FileType.Json)]
-    public class ScanCategory : FullyAuditedEntity<Guid>
+    [FilePath(@"{DATA}\authors.json", FileType.Json)]
+    public class ScanAuthor : FullyAuditedEntity<Guid>
     {
         [JsonProperty("name")]
         public string? Name { get; set; }
         [JsonProperty("description")]
         public string? Description { get; set; }
-        [JsonProperty("author")]
-        public string? Author { get; set; }
 
         public override bool GetByID(object ID)
         {
-            return this.Id == Guid.Parse(ID.ToString());
+            return this.Id.Equals(Guid.Parse(ID.ToString()));
         }
 
         public override bool Search(string wordToSearch)
         {
-            return (
+            return
                 Name.SafeContains(wordToSearch) ||
-                Description.SafeContains(wordToSearch) ||
-                Author.SafeContains(wordToSearch)
-            );
+                Description.SafeContains(wordToSearch);
         }
     }
 }

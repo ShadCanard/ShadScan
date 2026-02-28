@@ -1,0 +1,68 @@
+﻿<UserControl x:Class="ShadScan.Client.Fragments.Library.ViewLibraryFragment"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ShadScan.Client.Fragments.Library"
+             xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <ListView x:Name="lvContent" Margin="5" BorderBrush="{DynamicResource MahApps.Brushes.Control.Border}" BorderThickness="1"
+                  PreviewMouseLeftButtonDown="OnPreviewMouseLeftButton"
+                  MouseMove="OnMouseOver"
+                  AllowDrop="True"
+                  DragOver="OnDragOver"
+                  MouseDoubleClick="OnOpenItem"
+                  Drop="OnItemDrop">
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel />
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Border BorderBrush="{DynamicResource MahApps.Brushes.Button.Border}" BorderThickness="1">
+                        <Grid Width="100" Height="125">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Image Source="{Binding Image}" Margin="5" />
+                            <!-- chevron shown when item has multiple files -->
+                            <TextBlock Grid.Row="0" 
+                                       Text="+" 
+                                       FontSize="12" 
+                                       Foreground="{DynamicResource MahApps.Brushes.Badged.Foreground}" 
+                                       Background="{DynamicResource MahApps.Brushes.Badged.Background}"
+                                       HorizontalAlignment="Right" 
+                                       VerticalAlignment="Top" 
+                                       Margin="5"
+                                       Visibility="{Binding HasMultipleFiles, Converter={StaticResource BoolToVis}}"/>
+                            <TextBlock Text="{Binding Name}" Grid.Row="1" Margin="5" TextAlignment="Center" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="5">
+            <TextBlock Text="Zoom : 1x" Margin="5" x:Name="txtZoom" />
+            <Slider HorizontalAlignment="Right"
+                    Minimum="1"
+                    Maximum="8"
+                    Value="1"
+                    TickFrequency="1"
+                    TickPlacement="BottomRight"
+                    IsSnapToTickEnabled="True"
+                    Width="200"
+                    ValueChanged="OnSetZoomLevel"/>
+        </StackPanel>
+    </Grid>
+</UserControl>
