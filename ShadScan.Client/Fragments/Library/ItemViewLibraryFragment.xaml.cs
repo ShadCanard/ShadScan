@@ -12,6 +12,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.Drawing.Printing;
 
 namespace ShadScan.Client.Fragments.Library
 {
@@ -173,16 +175,47 @@ namespace ShadScan.Client.Fragments.Library
 
         private void OnOpenClick(object sender, RoutedEventArgs e)
         {
+            string? filePath = Item?.Files?.FirstOrDefault(f => f.PageNumber == CurrentPage)?.Path;
 
+            if ( Item == null || Item.Files == null || Item.Files.Count == 0 || string.IsNullOrWhiteSpace(filePath)) return;
+            Process.Start("explorer.exe", Item?.Files?.First(f => f.PageNumber == CurrentPage)?.Path);
         }
         private void OnPrintClick(object sender, RoutedEventArgs e)
         {
-
+            PrintDocument pd = new PrintDocument();
+            pd.PrintPage += (s, args) =>
+            {
+                System.Drawing.Image img = System.Drawing.Image.FromFile(Item.Files.FirstOrDefault(f => f.PageNumber == CurrentPage).Path);
+                System.Drawing.Point loc = new System.Drawing.Point(100, 100);
+                args?.Graphics?.DrawImage(img, loc);
+            };
+            pd.Print();
         }
 
         private void OnUnbindClick(object sender, RoutedEventArgs e)
         {
+            var selectedFile = Item?.Files.First(f => f.PageNumber == CurrentPage);
+            var toCopy = new ScanItem()
+            {
+                Author = Item?.Author,
+                Name = System.IO.Path.GetFileName(selectedFile?.Path) ?? "untitled.png",
+                Category = Item?.Category,
+                Tags = Item?.Tags ?? [],
+                Type = Item?.Type ?? ImageType.UNKNOWN,
+                Description = Item?.Description ?? "",
+                Files =
+                [
+                    new ScanFile()
+                    {
+                        PageNumber = 1,
+                        Path = selectedFile?.Path ?? ""
+                    }
+                ]
+            };
 
+            Item?.Files?.Remove(Item.Files.First(i => i.PageNumber == CurrentPage));
+            Instance.GetInstance().GetRepository<ScanItem>().Add(toCopy);
+            Instance.GetInstance().GetRepository<ScanItem>().SaveEdit();
         }
 
         private void OnNextClick(object sender, RoutedEventArgs e)
