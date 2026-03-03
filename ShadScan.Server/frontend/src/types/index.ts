@@ -42,7 +42,7 @@ export interface Scan {
   category: Category;
   tags: Tag[];
   linkedScans: Scan[];
-  receivedAt: string;
+  receivedAt: string | number | null;
   createdAt: string;
   updatedAt: string;
 }

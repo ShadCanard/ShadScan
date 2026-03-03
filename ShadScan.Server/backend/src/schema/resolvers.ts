@@ -9,6 +9,22 @@ const scanInclude = {
   linkedScans: true,
 };
 
+// Prisma returns Date objects, but to avoid clients receiving numeric timestamps
+// we convert relevant fields to ISO strings before sending them over GraphQL.
+function normalizeScanDates(scan: any): any {
+  if (!scan) return scan;
+  ["receivedAt", "createdAt", "updatedAt"].forEach((field) => {
+    const val = scan[field];
+    if (val instanceof Date) {
+      scan[field] = val.toISOString();
+    }
+  });
+  if (scan.linkedScans && Array.isArray(scan.linkedScans)) {
+    scan.linkedScans = scan.linkedScans.map(normalizeScanDates);
+  }
+  return scan;
+}
+
 export const resolvers = {
   Query: {
     scans: async (
@@ -68,7 +84,7 @@ export const resolvers = {
       ]);
 
       return {
-        scans,
+        scans: scans.map(normalizeScanDates),
         total,
         page,
         pageSize,
@@ -77,10 +93,11 @@ export const resolvers = {
     },
 
     scan: async (_: unknown, args: { id: number }) => {
-      return prisma.scan.findUnique({
+      const scan = await prisma.scan.findUnique({
         where: { id: args.id },
         include: scanInclude,
       });
+      return normalizeScanDates(scan);
     },
 
     categories: async () => {
@@ -155,7 +172,7 @@ export const resolvers = {
     ) => {
       const { tagIds, linkedScanIds, receivedAt, ...data } = args.input;
 
-      return prisma.scan.create({
+      const created = await prisma.scan.create({
         data: {
           ...data,
           type: data.type ?? "UNKNOWN",
@@ -165,6 +182,7 @@ export const resolvers = {
         },
         include: scanInclude,
       });
+      return normalizeScanDates(created);
     },
 
     updateScan: async (
@@ -184,7 +202,7 @@ export const resolvers = {
     ) => {
       const { tagIds, linkedScanIds, receivedAt, ...data } = args.input;
 
-      return prisma.scan.update({
+      const updated = await prisma.scan.update({
         where: { id: args.id },
         data: {
           ...data,
@@ -194,6 +212,7 @@ export const resolvers = {
         },
         include: scanInclude,
       });
+      return normalizeScanDates(updated);
     },
 
     deleteScan: async (_: unknown, args: { id: number }) => {

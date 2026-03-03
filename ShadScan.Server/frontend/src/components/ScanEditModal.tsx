@@ -45,7 +45,9 @@ export default function ScanEditModal({
   const [author, setAuthor] = useState(scan.author);
   const [type, setType] = useState<string>(scan.type);
   const [categoryId, setCategoryId] = useState<string>(String(scan.categoryId));
-  const [receivedAt, setReceivedAt] = useState<string>(scan.receivedAt);
+  const [receivedAt, setReceivedAt] = useState<string>(
+    scan.receivedAt ? String(scan.receivedAt) : ""
+  );
   const [tagIds, setTagIds] = useState<string[]>(
     scan.tags.map((t) => String(t.id))
   );
@@ -60,7 +62,7 @@ export default function ScanEditModal({
     setCategoryId(String(scan.categoryId));
     setTagIds(scan.tags.map((t) => String(t.id)));
     setLinkedScanIds(scan.linkedScans.map((s) => String(s.id)));
-    setReceivedAt(scan.receivedAt);
+    setReceivedAt(scan.receivedAt ? String(scan.receivedAt) : "");
   }, [scan]);
 
   const queryClient = useQueryClient();
@@ -116,6 +118,7 @@ export default function ScanEditModal({
         input: {
           name,
           author,
+          receivedAt: receivedAt || null,
           type: type as ScanType,
           categoryId: parseInt(categoryId),
           tagIds: tagIds.map(Number),

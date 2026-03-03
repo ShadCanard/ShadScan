@@ -8,10 +8,13 @@ import {
   Text,
   Badge,
   Divider,
+  Button,
+  Box,
 } from "@mantine/core";
 import type { Scan } from "@/types";
 import { SCAN_TYPE_LABELS } from "@/types";
-import { getScanImageUrl, formatFileSize, formatDate } from "@/lib/utils";
+import { getScanImageUrl, formatFileSize, formatDate, formatDateOnly } from "@/lib/utils";
+import { IconArrowUpRight } from "@tabler/icons-react";
 
 interface ScanViewModalProps {
   scan: Scan;
@@ -24,22 +27,52 @@ export default function ScanViewModal({
   opened,
   onClose,
 }: ScanViewModalProps) {
+  
   return (
     <Modal
       opened={opened}
       onClose={onClose}
-      title={scan.name}
+      // custom title so we can include a button that opens the image in a new tab
+      title={
+        <Group gap="xs" align="center" style={{ width: '100%' }}>
+          <Box flex={1}>
+            <Text>{scan.name}</Text>
+          </Box>
+          <a
+            href={getScanImageUrl(scan.filePath)}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <Button size="xs" variant="subtle" color="green">
+              <IconArrowUpRight size={16} />
+            </Button>
+          </a>
+        </Group>
+      }
       size="xl"
     >
       <Stack>
-        <Image
-          src={getScanImageUrl(scan.filePath)}
-          alt={scan.name}
-          mah={500}
-          fit="contain"
-          radius="md"
-          fallbackSrc="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iIzJlMmUyZSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjNjk2OTY5IiBmb250LXNpemU9IjE2Ij5JbWFnZSBub24gZGlzcG9uaWJsZTwvdGV4dD48L3N2Zz4="
-        />
+        {scan.mimeType === "application/pdf" ? (
+          <Box style={{ width: "100%", height: 500 }}>
+            <object
+              data={getScanImageUrl(scan.filePath)}
+              type="application/pdf"
+              width="100%"
+              height="100%"
+            >
+              <Text>Votre navigateur ne supporte pas l&apos;affichage des PDF.</Text>
+            </object>
+          </Box>
+        ) : (
+          <Image
+            src={getScanImageUrl(scan.filePath)}
+            alt={scan.name}
+            mah={500}
+            fit="contain"
+            radius="md"
+            fallbackSrc="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iIzJlMmUyZSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjNjk2OTY5IiBmb250LXNpemU9IjE2Ij5JbWFnZSBub24gZGlzcG9uaWJsZTwvdGV4dD48L3N2Zz4="
+          />
+        )}
 
         <Divider color="dark.5" />
 
@@ -74,7 +107,7 @@ export default function ScanViewModal({
 
         <div>
           <Text size="xs" c="dimmed">Reçu le</Text>
-          <Text size="sm" c="white">{formatDate(scan.receivedAt)}</Text>
+          <Text size="sm" c="white">{formatDateOnly(scan.receivedAt)}</Text>
         </div>
 
         {scan.tags.length > 0 && (

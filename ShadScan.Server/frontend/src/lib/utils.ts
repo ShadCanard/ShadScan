@@ -14,12 +14,42 @@ export function formatFileSize(bytes: number): string {
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
 }
 
-export function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString("fr-FR", {
+export function formatDate(value?: string | number | null): string {
+  if (value === undefined || value === null || value === "") return "";
+  let d: Date;
+  if (typeof value === "number") {
+    d = new Date(value);
+  } else {
+    d = new Date(value);
+  }
+  if (isNaN(d.getTime())) {
+    // if parsing failed just return original value so user sees something
+    return String(value);
+  }
+  return d.toLocaleDateString("fr-FR", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+  });
+}
+
+// same as formatDate but omit time portion (date only)
+export function formatDateOnly(value?: string | number | null): string {
+  if (value === undefined || value === null || value === "") return "";
+  let d: Date;
+  if (typeof value === "number") {
+    d = new Date(value);
+  } else {
+    d = new Date(value);
+  }
+  if (isNaN(d.getTime())) {
+    return String(value);
+  }
+  return d.toLocaleDateString("fr-FR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
   });
 }
