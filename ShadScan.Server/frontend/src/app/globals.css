@@ -1,0 +1,39 @@
+:root {
+  --bg-primary: #141414;
+  --bg-secondary: #1f1f1f;
+  --bg-card: #242424;
+  --border-color: #3b3b3b;
+  --accent: #872df3;
+  --accent-light: #9645f5;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-primary);
+  color: #c9c9c9;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}

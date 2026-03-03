@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum ScanType {
+  UNKNOWN
+  LETTER
+  PHOTO
+  DRAWING
+}
+
+model Category {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique @db.VarChar(100)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  scans     Scan[]
+
+  @@map("categories")
+}
+
+model Tag {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique @db.VarChar(100)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  scans     Scan[]   @relation("ScanTags")
+
+  @@map("tags")
+}
+
+model Scan {
+  id         Int      @id @default(autoincrement())
+  name       String   @db.VarChar(255)
+  author     String   @db.VarChar(255)
+  type       ScanType @default(UNKNOWN)
+  filePath   String   @db.VarChar(500)
+  fileName   String   @db.VarChar(255)
+  mimeType   String   @db.VarChar(100)
+  fileSize   Int
+  categoryId Int
+  category   Category @relation(fields: [categoryId], references: [id])
+  tags       Tag[]    @relation("ScanTags")
+
+  // self-referencing many‑to‑many for linked scans
+  linkedScans Scan[] @relation("ScanLinks")
+  linkedFrom  Scan[] @relation("ScanLinks")
+
+  receivedAt  DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([categoryId])
+  @@index([type])
+  @@index([author])
+  @@map("scans")
+}

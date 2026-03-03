@@ -1,0 +1,19 @@
+# common
+node_modules/
+
+# backend build output
+/dist/
+
+# uploaded files (keep the placeholder)
+uploads/*
+!uploads/.gitkeep
+
+# environment
+.env
+
+# frontend build / Next.js
+/.next/
+/out/
+.env.local
+
+.next/
