@@ -41,8 +41,8 @@ Sh/
 - **Tabler Icons** — Icônes
 
 ### API REST (pour client lourd)
-- `POST /api/upload` — Upload d'un fichier unique (champ supplémentaire `linkedScanIds` pour relier à d'autres scans)
-- `POST /api/upload/bulk` — Upload groupé (max 20 fichiers, accepte aussi `linkedScanIds`)
+- `POST /api/upload` — Upload d'un fichier unique
+- `POST /api/upload/bulk` — Upload groupé (max 20 fichiers)
 - `GET /uploads/:filename` — Accès aux fichiers
 
 ## Prérequis
@@ -110,14 +110,25 @@ Le frontend sera disponible sur `http://localhost:3000`
 | name       | String   | Nom du scan                           |
 | author     | String   | Auteur du document                    |
 | type       | Enum     | UNKNOWN, LETTER, PHOTO, DRAWING       |
-| filePath   | String   | Chemin vers le fichier                |
-| fileName   | String   | Nom du fichier original               |
-| mimeType   | String   | Type MIME du fichier                  |
-| fileSize   | Int      | Taille en octets                      |
 | categoryId | Int      | Référence vers la catégorie           |
 | category   | Category | Catégorie du scan                     |
 | tags       | Tag[]    | Tags associés                         |
-| linkedScans | Scan[]   | Autres scans liés à ce document      |
+| files      | ScanFile[] | Fichiers associés (0..n)           |
+
+A **ScanFile** est un objet distinct qui contient le chemin physique, le nom,
+le type MIME et la taille du fichier. Un scan peut avoir zéro, un ou plusieurs
+fichiers (utile pour les documents multi-pages, PDF + images, etc.).
+
+### ScanFile
+| Champ     | Type   | Description                       |
+|-----------|--------|-----------------------------------|
+| id        | Int    | Identifiant unique                |
+| filePath  | String | Chemin relatif vers le fichier    |
+| fileName  | String | Nom original du fichier           |
+| mimeType  | String | Type MIME                         |
+| fileSize  | Int    | Taille en octets                  |
+| createdAt | Date   | Date de création                  |
+| updatedAt | Date   | Date de dernière mise à jour      |
 
 ### Category
 | Champ | Type   | Description            |

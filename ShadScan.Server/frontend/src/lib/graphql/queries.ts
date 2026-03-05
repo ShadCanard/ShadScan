@@ -10,10 +10,6 @@ export const GET_SCANS = gql`
         name
         author
         type
-        filePath
-        fileName
-        mimeType
-        fileSize
         categoryId
         category {
           id
@@ -23,9 +19,13 @@ export const GET_SCANS = gql`
           id
           name
         }
-        linkedScans {
+        files {
           id
-          name
+          page
+          filePath
+          fileName
+          mimeType
+          fileSize
         }
         receivedAt
         createdAt
@@ -59,9 +59,13 @@ export const GET_SCAN = gql`
         id
         name
       }
-      linkedScans {
+      files {
         id
-        name
+        page
+        filePath
+        fileName
+        mimeType
+        fileSize
       }
       receivedAt
       createdAt
@@ -71,6 +75,18 @@ export const GET_SCAN = gql`
 `;
 
 // ============== SCAN LIST QUERY ==============
+
+export const GET_SCAN_FILES = gql`
+  query GetScanFiles($scanId: Int!) {
+    scanFiles(scanId: $scanId) {
+      id
+      filePath
+      fileName
+      mimeType
+      fileSize
+    }
+  }
+`;
 
 export const GET_SCAN_LIST = gql`
   query GetScanList {
@@ -145,9 +161,9 @@ export const CREATE_SCAN = gql`
         id
         name
       }
-      linkedScans {
+      files {
         id
-        name
+        filePath
       }
       receivedAt
     }
@@ -170,10 +186,6 @@ export const UPDATE_SCAN = gql`
         id
         name
       }
-      linkedScans {
-        id
-        name
-      }
       receivedAt
     }
   }
@@ -182,6 +194,36 @@ export const UPDATE_SCAN = gql`
 export const DELETE_SCAN = gql`
   mutation DeleteScan($id: Int!) {
     deleteScan(id: $id)
+  }
+`;
+
+export const ADD_SCAN_FILE = gql`
+  mutation AddScanFile(
+    $scanId: Int!
+    $filePath: String!
+    $fileName: String!
+    $mimeType: String!
+    $fileSize: Int!
+  ) {
+    addScanFile(
+      scanId: $scanId
+      filePath: $filePath
+      fileName: $fileName
+      mimeType: $mimeType
+      fileSize: $fileSize
+    ) {
+      id
+      filePath
+      fileName
+      mimeType
+      fileSize
+    }
+  }
+`;
+
+export const DELETE_SCAN_FILE = gql`
+  mutation DeleteScanFile($id: Int!) {
+    deleteScanFile(id: $id)
   }
 `;
 

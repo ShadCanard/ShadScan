@@ -67,8 +67,50 @@ async function startServer() {
         return;
       }
 
-      const { name, author, type, categoryId, tagIds, linkedScanIds } = req.body;
+      const { name, author, type, categoryId, tagIds, scanId } = req.body;
 
+      // if a scanId is provided we attach the file instead of creating a new scan
+      if (scanId) {
+        const sid = parseInt(scanId, 10);
+        if (isNaN(sid)) {
+          res.status(400).json({ error: "scanId invalide" });
+          return;
+        }
+        // ensure scan exists
+        const existing = await prisma.scan.findUnique({
+          where: { id: sid },
+          include: { files: true },
+        });
+        if (!existing) {
+          res.status(404).json({ error: "Scan introuvable" });
+          return;
+        }
+        // determine page number
+        const maxPageRes = await prisma.scanFile.aggregate({
+          where: { scanId: sid },
+          _max: { page: true },
+        });
+        const nextPage = (maxPageRes._max.page ?? 0) + 1;
+        const fileRec = await prisma.scanFile.create({
+          data: {
+            scanId: sid,
+            page: nextPage,
+            filePath: req.file.path.replace(/\\/g, "/"),
+            fileName: req.file.originalname,
+            mimeType: req.file.mimetype,
+            fileSize: req.file.size,
+          },
+        });
+        // return updated scan
+        const updated = await prisma.scan.findUnique({
+          where: { id: sid },
+          include: { files: true },
+        });
+        res.status(201).json(updated);
+        return;
+      }
+
+      // otherwise create a new scan as before
       if (!name || !author || !categoryId) {
         res.status(400).json({
           error: "Les champs name, author et categoryId sont requis",
@@ -77,7 +119,6 @@ async function startServer() {
       }
 
       const parsedTagIds = tagIds ? JSON.parse(tagIds) : [];
-      const parsedLinked = linkedScanIds ? JSON.parse(linkedScanIds) : [];
 
       const scan = await prisma.scan.create({
         data: {
@@ -85,20 +126,22 @@ async function startServer() {
           author,
           type: type || "UNKNOWN",
           categoryId: parseInt(categoryId, 10),
-          filePath: req.file.path.replace(/\\/g, "/"),
-          fileName: req.file.originalname,
-          mimeType: req.file.mimetype,
-          fileSize: req.file.size,
           tags: parsedTagIds.length
             ? { connect: parsedTagIds.map((id: number) => ({ id })) }
             : undefined,
-          linkedScans: parsedLinked.length
-            ? { connect: parsedLinked.map((id: number) => ({ id })) }
-            : undefined,
+          files: {
+            create: {
+              filePath: req.file.path.replace(/\\/g, "/"),
+              fileName: req.file.originalname,
+              mimeType: req.file.mimetype,
+              fileSize: req.file.size,
+            },
+          },
         },
         include: {
           category: true,
           tags: true,
+          files: true,
         },
       });
 
@@ -118,7 +161,7 @@ async function startServer() {
         return;
       }
 
-      const { author, categoryId, type, linkedScanIds } = req.body;
+      const { author, categoryId, type } = req.body;
 
       if (!author || !categoryId) {
         res.status(400).json({
@@ -127,7 +170,6 @@ async function startServer() {
         return;
       }
 
-      const parsedLinked = linkedScanIds ? JSON.parse(linkedScanIds) : [];
 
       const scans = await Promise.all(
         files.map((file) =>
@@ -137,17 +179,19 @@ async function startServer() {
               author,
               type: type || "UNKNOWN",
               categoryId: parseInt(categoryId, 10),
-              filePath: file.path.replace(/\\/g, "/"),
-              fileName: file.originalname,
-              mimeType: file.mimetype,
-              fileSize: file.size,
-              linkedScans: parsedLinked.length
-                ? { connect: parsedLinked.map((id: number) => ({ id })) }
-                : undefined,
+              files: {
+                create: {
+                  filePath: file.path.replace(/\\/g, "/"),
+                  fileName: file.originalname,
+                  mimeType: file.mimetype,
+                  fileSize: file.size,
+                },
+              },
             },
             include: {
               category: true,
               tags: true,
+              files: true,
             },
           })
         )

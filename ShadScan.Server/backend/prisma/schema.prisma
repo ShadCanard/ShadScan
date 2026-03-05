@@ -35,21 +35,16 @@ model Tag {
 }
 
 model Scan {
-  id         Int      @id @default(autoincrement())
-  name       String   @db.VarChar(255)
-  author     String   @db.VarChar(255)
-  type       ScanType @default(UNKNOWN)
-  filePath   String   @db.VarChar(500)
-  fileName   String   @db.VarChar(255)
-  mimeType   String   @db.VarChar(100)
-  fileSize   Int
-  categoryId Int
-  category   Category @relation(fields: [categoryId], references: [id])
-  tags       Tag[]    @relation("ScanTags")
+  id         Int        @id @default(autoincrement())
+  name       String     @db.VarChar(255)
+  author     String     @db.VarChar(255)
+  type       ScanType   @default(UNKNOWN)
+  categoryId Int  
+  category   Category   @relation(fields: [categoryId], references: [id])
+  tags       Tag[]      @relation("ScanTags")
 
-  // self-referencing many‑to‑many for linked scans
-  linkedScans Scan[] @relation("ScanLinks")
-  linkedFrom  Scan[] @relation("ScanLinks")
+  // relation to files
+  files      ScanFile[]
 
   receivedAt  DateTime @default(now())
   createdAt  DateTime @default(now())
@@ -59,4 +54,21 @@ model Scan {
   @@index([type])
   @@index([author])
   @@map("scans")
+}
+
+
+model ScanFile {
+  id        Int      @id @default(autoincrement())
+  scanId    Int
+  scan      Scan     @relation(fields: [scanId], references: [id])
+  page      Int      @default(1)
+  filePath  String   @db.VarChar(500)
+  fileName  String   @db.VarChar(255)
+  mimeType  String   @db.VarChar(100)
+  fileSize  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([scanId])
+  @@map("scan_files")
 }

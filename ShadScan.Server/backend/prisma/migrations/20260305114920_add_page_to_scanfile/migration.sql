@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `scan_files` ADD COLUMN `page` INTEGER NOT NULL DEFAULT 1;

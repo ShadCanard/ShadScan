@@ -18,7 +18,6 @@ import {
   UPDATE_SCAN,
   GET_CATEGORIES,
   GET_TAGS,
-  GET_SCAN_LIST,
 } from "@/lib/graphql/queries";
 import type { Scan, Category, Tag, ScanType } from "@/types";
 import { SCAN_TYPE_LABELS } from "@/types";
@@ -51,9 +50,6 @@ export default function ScanEditModal({
   const [tagIds, setTagIds] = useState<string[]>(
     scan.tags.map((t) => String(t.id))
   );
-  const [linkedScanIds, setLinkedScanIds] = useState<string[]>(
-    scan.linkedScans.map((s) => String(s.id))
-  );
 
   useEffect(() => {
     setName(scan.name);
@@ -61,7 +57,6 @@ export default function ScanEditModal({
     setType(scan.type);
     setCategoryId(String(scan.categoryId));
     setTagIds(scan.tags.map((t) => String(t.id)));
-    setLinkedScanIds(scan.linkedScans.map((s) => String(s.id)));
     setReceivedAt(scan.receivedAt ? String(scan.receivedAt) : "");
   }, [scan]);
 
@@ -77,10 +72,6 @@ export default function ScanEditModal({
     queryFn: () => graphqlQuery<{ tags: Tag[] }>(GET_TAGS),
   });
 
-  const { data: scansData } = useQuery<{ scans: { scans: { id: number; name: string }[] } }, Error>({
-    queryKey: ["scanList"],
-    queryFn: () => graphqlQuery<{ scans: { scans: { id: number; name: string }[] } }>(GET_SCAN_LIST),
-  });
 
   const [updateScan, { loading }] = useMutation(UPDATE_SCAN, {
     onCompleted: () => {
@@ -122,7 +113,6 @@ export default function ScanEditModal({
           type: type as ScanType,
           categoryId: parseInt(categoryId),
           tagIds: tagIds.map(Number),
-          linkedScanIds: linkedScanIds.map(Number),
         },
       },
     });
@@ -169,14 +159,6 @@ export default function ScanEditModal({
           data={tagOptions}
           value={tagIds}
           onChange={setTagIds}
-        />
-        <MultiSelect
-          label="Scans liés"
-          data={(scansData?.scans.scans ?? [])
-            .filter((s) => s.id !== scan.id)
-            .map((s) => ({ value: String(s.id), label: s.name }))}
-          value={linkedScanIds}
-          onChange={setLinkedScanIds}
         />
         <Group justify="flex-end" mt="md">
           <Button variant="subtle" color="gray" onClick={onClose}>

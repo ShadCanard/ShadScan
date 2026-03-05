@@ -29,6 +29,17 @@ export interface Tag {
   updatedAt: string;
 }
 
+export interface ScanFile {
+  id: number;
+  page: number;
+  filePath: string;
+  fileName: string;
+  mimeType: string;
+  fileSize: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Scan {
   id: number;
   name: string;
@@ -41,7 +52,7 @@ export interface Scan {
   categoryId: number;
   category: Category;
   tags: Tag[];
-  linkedScans: Scan[];
+  files?: ScanFile[]; // new relation
   receivedAt: string | number | null;
   createdAt: string;
   updatedAt: string;

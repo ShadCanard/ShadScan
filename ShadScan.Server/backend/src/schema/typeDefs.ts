@@ -29,19 +29,26 @@ export const typeDefs = gql`
     scans: [Scan!]!
   }
 
+  type ScanFile {
+    id: Int!
+    page: Int!
+    filePath: String!
+    fileName: String!
+    mimeType: String!
+    fileSize: Int!
+    createdAt: String!
+    updatedAt: String!
+  }
+
   type Scan {
     id: Int!
     name: String!
     author: String!
     type: ScanType!
-    filePath: String!
-    fileName: String!
-    mimeType: String!
-    fileSize: Int!
     categoryId: Int!
     category: Category!
     tags: [Tag!]!
-    linkedScans: [Scan!]!    # other scans linked to this one
+    files: [ScanFile!]!     # associated files
     createdAt: String!
     updatedAt: String!
     receivedAt: String!
@@ -61,12 +68,6 @@ export const typeDefs = gql`
     type: ScanType
     categoryId: Int!
     tagIds: [Int!]
-    linkedScanIds: [Int!]
-    filePath: String!
-    fileName: String!
-    mimeType: String!
-    fileSize: Int!
-    receivedAt: String!
   }
 
   input UpdateScanInput {
@@ -75,7 +76,6 @@ export const typeDefs = gql`
     type: ScanType
     categoryId: Int
     tagIds: [Int!]
-    linkedScanIds: [Int!]
     receivedAt: String
   }
 
@@ -108,6 +108,10 @@ export const typeDefs = gql`
     scans(page: Int, pageSize: Int, filter: ScanFilterInput): PaginatedScans!
     scan(id: Int!): Scan
 
+    # Scan files
+    scanFile(id: Int!): ScanFile
+    scanFiles(scanId: Int!): [ScanFile!]!
+
     # Categories
     categories: [Category!]!
     category(id: Int!): Category
@@ -137,6 +141,16 @@ export const typeDefs = gql`
     createScan(input: CreateScanInput!): Scan!
     updateScan(id: Int!, input: UpdateScanInput!): Scan!
     deleteScan(id: Int!): Boolean!
+
+    # Scan files
+    addScanFile(
+      scanId: Int!
+      filePath: String!
+      fileName: String!
+      mimeType: String!
+      fileSize: Int!
+    ): ScanFile!
+    deleteScanFile(id: Int!): Boolean!
 
     # Categories
     createCategory(input: CreateCategoryInput!): Category!

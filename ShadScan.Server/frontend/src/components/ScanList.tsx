@@ -35,6 +35,7 @@ import {
   IconEye,
   IconDotsVertical,
   IconX,
+  IconFileTypePdf,
 } from "@tabler/icons-react";
 import {
   GET_SCANS,
@@ -51,7 +52,7 @@ import type {
   ScanType,
 } from "@/types";
 import { SCAN_TYPE_LABELS } from "@/types";
-import { getScanImageUrl, formatFileSize, formatDate } from "@/lib/utils";
+import { getScanImageUrl, formatFileSize, formatDate, formatDateOnly } from "@/lib/utils";
 import ScanEditModal from "./ScanEditModal";
 import ScanViewModal from "./ScanViewModal";
 
@@ -244,19 +245,29 @@ export default function ScanList() {
         </Card>
       ) : (
         <SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 4 }}>
-          {scans.map((scan) => (
+          {scans.map((scan) => {
+            const primary = scan.files && scan.files.length > 0
+              ? scan.files[0]
+              : { filePath: scan.filePath } as any;
+            return (
             <Card key={scan.id} padding={0} style={{ overflow: "hidden" }}>
               <Box
                 style={{ cursor: "pointer", position: "relative" }}
                 onClick={() => handleViewScan(scan)}
               >
-                <Image
-                  src={getScanImageUrl(scan.filePath)}
-                  alt={scan.name}
-                  h={180}
-                  fit="cover"
-                  fallbackSrc="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzJlMmUyZSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjNjk2OTY5IiBmb250LXNpemU9IjE0Ij5QYXMgZCdhcGVyw6d1PC90ZXh0Pjwvc3ZnPg=="
-                />
+                {primary.mimeType === 'application/pdf' ? (
+                  <Group justify="center" style={{ height: 180 }}>
+                    <IconFileTypePdf size={48} color="white" />
+                  </Group>
+                ) : (
+                  <Image
+                    src={getScanImageUrl(primary.filePath)}
+                    alt={scan.name}
+                    h={180}
+                    fit="cover"
+                    fallbackSrc="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzJlMmUyZSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjNjk2OTY5IiBmb250LXNpemU9IjE0Ij5QYXMgZCdhcGVyw6d1PC90ZXh0Pjwvc3ZnPg=="
+                  />
+                )}
                 <Badge
                   size="sm"
                   variant="filled"
@@ -304,7 +315,7 @@ export default function ScanList() {
                 </Group>
 
                 <Text size="xs" c="dimmed">
-                  {scan.author} · {formatFileSize(scan.fileSize)}
+                  {scan.author} - {formatDateOnly(scan.receivedAt)}
                 </Text>
 
                 <Group gap={4}>
@@ -324,7 +335,8 @@ export default function ScanList() {
                 </Group>
               </Stack>
             </Card>
-          ))}
+          );
+        })}
         </SimpleGrid>
       )}
 

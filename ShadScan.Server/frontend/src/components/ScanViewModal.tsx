@@ -11,6 +11,7 @@ import {
   Button,
   Box,
 } from "@mantine/core";
+import { useState, useEffect } from "react";
 import type { Scan } from "@/types";
 import { SCAN_TYPE_LABELS } from "@/types";
 import { getScanImageUrl, formatFileSize, formatDate, formatDateOnly } from "@/lib/utils";
@@ -27,7 +28,20 @@ export default function ScanViewModal({
   opened,
   onClose,
 }: ScanViewModalProps) {
-  
+  // build array of associated files (legacy values if relation absent)
+  const filesArray = scan.files && scan.files.length > 0
+    ? scan.files
+    : [{ filePath: scan.filePath, fileName: scan.fileName, mimeType: scan.mimeType, fileSize: scan.fileSize } as any];
+
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  // reset index when scan changes
+  useEffect(() => {
+    setCurrentIndex(0);
+  }, [scan]);
+
+  const current = filesArray[currentIndex];
+
   return (
     <Modal
       opened={opened}
@@ -39,7 +53,7 @@ export default function ScanViewModal({
             <Text>{scan.name}</Text>
           </Box>
           <a
-            href={getScanImageUrl(scan.filePath)}
+            href={getScanImageUrl(current.filePath)}
             target="_blank"
             rel="noreferrer"
           >
@@ -52,10 +66,10 @@ export default function ScanViewModal({
       size="xl"
     >
       <Stack>
-        {scan.mimeType === "application/pdf" ? (
+        {current.mimeType === "application/pdf" ? (
           <Box style={{ width: "100%", height: 500 }}>
             <object
-              data={getScanImageUrl(scan.filePath)}
+              data={getScanImageUrl(current.filePath)}
               type="application/pdf"
               width="100%"
               height="100%"
@@ -65,13 +79,37 @@ export default function ScanViewModal({
           </Box>
         ) : (
           <Image
-            src={getScanImageUrl(scan.filePath)}
+            src={getScanImageUrl(current.filePath)}
             alt={scan.name}
             mah={500}
             fit="contain"
             radius="md"
             fallbackSrc="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iIzJlMmUyZSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjNjk2OTY5IiBmb250LXNpemU9IjE2Ij5JbWFnZSBub24gZGlzcG9uaWJsZTwvdGV4dD48L3N2Zz4="
           />
+        )}
+        {/* navigation buttons if multiple */}
+        {filesArray.length > 1 && (
+          <Group justify="space-between" mt="sm">
+            <Button
+              size="xs"
+              variant="outline"
+              disabled={currentIndex === 0}
+              onClick={() => setCurrentIndex((i) => Math.max(0, i - 1))}
+            >
+              Précédent
+            </Button>
+            <Text size="xs" c="dimmed">
+              {currentIndex + 1}/{filesArray.length}
+            </Text>
+            <Button
+              size="xs"
+              variant="outline"
+              disabled={currentIndex === filesArray.length - 1}
+              onClick={() => setCurrentIndex((i) => Math.min(filesArray.length - 1, i + 1))}
+            >
+              Suivant
+            </Button>
+          </Group>
         )}
 
         <Divider color="dark.5" />
@@ -91,7 +129,7 @@ export default function ScanViewModal({
           </div>
           <div>
             <Text size="xs" c="dimmed">Taille</Text>
-            <Text size="sm" c="white">{formatFileSize(scan.fileSize)}</Text>
+            <Text size="sm" c="white">{formatFileSize(current.fileSize)}</Text>
           </div>
         </Group>
 
@@ -102,7 +140,7 @@ export default function ScanViewModal({
 
         <div>
           <Text size="xs" c="dimmed">Fichier original</Text>
-          <Text size="sm" c="white">{scan.fileName}</Text>
+          <Text size="sm" c="white">{current.fileName}</Text>
         </div>
 
         <div>
@@ -110,31 +148,8 @@ export default function ScanViewModal({
           <Text size="sm" c="white">{formatDateOnly(scan.receivedAt)}</Text>
         </div>
 
-        {scan.tags.length > 0 && (
-          <div>
-            <Text size="xs" c="dimmed" mb={4}>Tags</Text>
-            <Group gap={4}>
-              {scan.tags.map((tag) => (
-                <Badge key={tag.id} variant="outline" color="violet" size="sm">
-                  {tag.name}
-                </Badge>
-              ))}
-            </Group>
-          </div>
-        )}
 
-        {scan.linkedScans.length > 0 && (
-          <div>
-            <Text size="xs" c="dimmed" mb={4}>Scans liés</Text>
-            <Group gap={4}>
-              {scan.linkedScans.map((s) => (
-                <Badge key={s.id} variant="outline" color="grape" size="sm">
-                  {s.name}
-                </Badge>
-              ))}
-            </Group>
-          </div>
-        )}
+
 
         <Group justify="space-between">
           <div>

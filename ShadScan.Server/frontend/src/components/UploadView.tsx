@@ -22,7 +22,7 @@ import {
 } from "@mantine/core";
 import { Dropzone, IMAGE_MIME_TYPE } from "@mantine/dropzone";
 import { notifications } from "@mantine/notifications";
-import { IconUpload, IconPhoto, IconX, IconTrash } from "@tabler/icons-react";
+import { IconUpload, IconPhoto, IconX, IconTrash, IconFileTypePdf } from "@tabler/icons-react";
 import { GET_CATEGORIES, GET_TAGS, CREATE_SCAN, GET_SCAN_LIST } from "@/lib/graphql/queries";
 import type { Category, Tag, ScanType } from "@/types";
 import { SCAN_TYPE_LABELS } from "@/types";
@@ -55,7 +55,7 @@ export default function UploadView() {
   const [type, setType] = useState<string>("UNKNOWN");
   const [categoryId, setCategoryId] = useState<string>("");
   const [tagIds, setTagIds] = useState<string[]>([]);
-  const [linkedScanIds, setLinkedScanIds] = useState<string[]>([]);
+  const [existingScanId, setExistingScanId] = useState<string>("");
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
 
@@ -101,10 +101,18 @@ export default function UploadView() {
   };
 
   const handleUpload = async () => {
-    if (files.length === 0 || !author || !categoryId) {
+    if (files.length === 0) {
       notifications.show({
         title: "Champs requis",
-        message: "Veuillez remplir l'auteur, la catégorie et ajouter au moins un fichier",
+        message: "Veuillez ajouter au moins un fichier",
+        color: "orange",
+      });
+      return;
+    }
+    if (!existingScanId && (!author || !categoryId)) {
+      notifications.show({
+        title: "Champs requis",
+        message: "Veuillez remplir l'auteur et la catégorie si vous créez un nouveau scan",
         color: "orange",
       });
       return;
@@ -119,13 +127,16 @@ export default function UploadView() {
       for (const fileItem of files) {
         const formData = new FormData();
         formData.append("file", fileItem.file);
-        formData.append("name", fileItem.name);
-        formData.append("author", author);
-        formData.append("type", type);
-        formData.append("categoryId", categoryId);
-        formData.append("tagIds", JSON.stringify(tagIds.map(Number)));
-        formData.append("receivedAt", receivedAt);
-        formData.append("linkedScanIds", JSON.stringify(linkedScanIds.map(Number)));
+        if (existingScanId) {
+          formData.append("scanId", existingScanId);
+        } else {
+          formData.append("name", fileItem.name);
+          formData.append("author", author);
+          formData.append("type", type);
+          formData.append("categoryId", categoryId);
+          formData.append("tagIds", JSON.stringify(tagIds.map(Number)));
+          formData.append("receivedAt", receivedAt);
+        }
 
         const response = await fetch(`${API_URL}/api/upload`, {
           method: "POST",
@@ -239,13 +250,19 @@ export default function UploadView() {
                   <IconTrash size={10} />
                 </ActionIcon>
                 <AspectRatio ratio={297 / 210} style={{ width: '100%' }}>
-                  <Image
-                    src={f.preview}
-                    alt={f.name}
-                    fit="cover"
-                    radius="sm"
-                    style={{ objectFit: 'cover' }}
-                  />
+                  {f.file.type === 'application/pdf' ? (
+                    <Group justify="center" style={{ height: '100%' }}>
+                      <IconFileTypePdf size={48} color="white" />
+                    </Group>
+                  ) : (
+                    <Image
+                      src={f.preview}
+                      alt={f.name}
+                      fit="cover"
+                      radius="sm"
+                      style={{ objectFit: 'cover' }}
+                    />
+                  )}
                 </AspectRatio>
                 <Text size="xs" c="white" lineClamp={1} mt={4}>
                   {f.name}
@@ -265,39 +282,47 @@ export default function UploadView() {
           Informations
         </Text>
         <SimpleGrid cols={{ base: 1, sm: 2 }}>
+          <Select
+            label="Scan existant (optionnel)"
+            placeholder="Choisir un scan pour y ajouter les fichiers"
+            data={(scansData?.scans.scans ?? []).map((s) => ({
+              value: String(s.id),
+              label: s.name,
+            }))}
+            value={existingScanId}
+            onChange={(val) => setExistingScanId(val || "")}
+            clearable
+          />
           <TextInput
             label="Auteur"
             placeholder="Nom de l'auteur"
             value={author}
             onChange={(e) => setAuthor(e.currentTarget.value)}
-            required
+            required={!existingScanId}
+            disabled={!!existingScanId}
           />
           <Select
             label="Type"
             data={SCAN_TYPES}
             value={type}
             onChange={(val) => val && setType(val)}
-            required
+            required={!existingScanId}
+            disabled={!!existingScanId}
           />
           <Select
             label="Catégorie"
             data={categoryOptions}
             value={categoryId}
             onChange={(val) => val && setCategoryId(val)}
-            required
+            required={!existingScanId}
+            disabled={!!existingScanId}
           />
           <MultiSelect
             label="Tags"
             data={tagOptions}
             value={tagIds}
             onChange={setTagIds}
-          />
-          <MultiSelect
-            label="Scans liés"
-            data={(scansData?.scans.scans ?? [])
-              .map((s) => ({ value: String(s.id), label: s.name }))}
-            value={linkedScanIds}
-            onChange={setLinkedScanIds}
+            disabled={!!existingScanId}
           />
           <TextInput
             label="Date de réception"
@@ -305,6 +330,7 @@ export default function UploadView() {
             value={receivedAt}
             onChange={(e) => setReceivedAt(e.currentTarget.value)}
             type="date"
+            disabled={!!existingScanId}
           />
         </SimpleGrid>
 

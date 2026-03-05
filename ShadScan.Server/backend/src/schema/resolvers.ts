@@ -6,7 +6,7 @@ import path from "path";
 const scanInclude = {
   category: true,
   tags: true,
-  linkedScans: true,
+  files: true,
 };
 
 // Prisma returns Date objects, but to avoid clients receiving numeric timestamps
@@ -19,8 +19,20 @@ function normalizeScanDates(scan: any): any {
       scan[field] = val.toISOString();
     }
   });
-  if (scan.linkedScans && Array.isArray(scan.linkedScans)) {
-    scan.linkedScans = scan.linkedScans.map(normalizeScanDates);
+  if (scan.files && Array.isArray(scan.files)) {
+    // ensure deterministic order by page
+    scan.files = scan.files
+      .slice()
+      .sort((a: any, b: any) => (a.page || 0) - (b.page || 0))
+      .map((file: any) => {
+        ["createdAt", "updatedAt"].forEach((f) => {
+          const val = file[f];
+          if (val instanceof Date) {
+            file[f] = val.toISOString();
+          }
+        });
+        return file;
+      });
   }
   return scan;
 }
@@ -127,6 +139,17 @@ export const resolvers = {
       });
     },
 
+    scanFile: async (_: unknown, args: { id: number }) => {
+      return prisma.scanFile.findUnique({ where: { id: args.id } });
+    },
+
+    scanFiles: async (_: unknown, args: { scanId: number }) => {
+      return prisma.scanFile.findMany({
+        where: { scanId: args.scanId },
+        orderBy: { createdAt: "desc" },
+      });
+    },
+
     stats: async () => {
       const [totalScans, totalCategories, totalTags, scansByType] =
         await Promise.all([
@@ -161,7 +184,6 @@ export const resolvers = {
           type?: ScanType;
           categoryId: number;
           tagIds?: number[];
-          linkedScanIds?: number[];
           receivedAt?: string;
           filePath: string;
           fileName: string;
@@ -170,20 +192,69 @@ export const resolvers = {
         };
       }
     ) => {
-      const { tagIds, linkedScanIds, receivedAt, ...data } = args.input;
+      const { tagIds, receivedAt, filePath, fileName, mimeType, fileSize, ...data } = args.input;
 
       const created = await prisma.scan.create({
         data: {
           ...data,
           type: data.type ?? "UNKNOWN",
           tags: tagIds ? { connect: tagIds.map((id) => ({ id })) } : undefined,
-          linkedScans: linkedScanIds ? { connect: linkedScanIds.map((id) => ({ id })) } : undefined,
           receivedAt: receivedAt ? new Date(receivedAt) : undefined,
+          files: {
+            create: {
+              filePath,
+              fileName,
+              mimeType,
+              fileSize,
+            },
+          },
         },
         include: scanInclude,
       });
       return normalizeScanDates(created);
     },
+
+    addScanFile: async (
+      _: unknown,
+      args: {
+        scanId: number;
+        filePath: string;
+        fileName: string;
+        mimeType: string;
+        fileSize: number;
+      }
+    ) => {
+      // compute next page number
+      const maxPage = await prisma.scanFile.aggregate({
+        where: { scanId: args.scanId },
+        _max: { page: true },
+      });
+      const nextPage = (maxPage._max.page ?? 0) + 1;
+      const file = await prisma.scanFile.create({
+        data: {
+          scanId: args.scanId,
+          page: nextPage,
+          filePath: args.filePath,
+          fileName: args.fileName,
+          mimeType: args.mimeType,
+          fileSize: args.fileSize,
+        },
+      });
+      return file;
+    },
+
+    deleteScanFile: async (_: unknown, args: { id: number }) => {
+      const file = await prisma.scanFile.findUnique({ where: { id: args.id } });
+      if (file) {
+        const fullPath = path.resolve(file.filePath);
+        if (fs.existsSync(fullPath)) {
+          fs.unlinkSync(fullPath);
+        }
+        await prisma.scanFile.delete({ where: { id: args.id } });
+      }
+      return true;
+    },
+
 
     updateScan: async (
       _: unknown,
@@ -195,19 +266,17 @@ export const resolvers = {
           type?: ScanType;
           categoryId?: number;
           tagIds?: number[];
-          linkedScanIds?: number[];
           receivedAt?: string;
         };
       }
     ) => {
-      const { tagIds, linkedScanIds, receivedAt, ...data } = args.input;
+      const { tagIds, receivedAt, ...data } = args.input;
 
       const updated = await prisma.scan.update({
         where: { id: args.id },
         data: {
           ...data,
           tags: tagIds ? { set: tagIds.map((id) => ({ id })) } : undefined,
-          linkedScans: linkedScanIds ? { set: linkedScanIds.map((id) => ({ id })) } : undefined,
           receivedAt: receivedAt ? new Date(receivedAt) : undefined,
         },
         include: scanInclude,
@@ -216,13 +285,21 @@ export const resolvers = {
     },
 
     deleteScan: async (_: unknown, args: { id: number }) => {
-      const scan = await prisma.scan.findUnique({ where: { id: args.id } });
+      const scan = await prisma.scan.findUnique({
+        where: { id: args.id },
+        include: { files: true },
+      });
       if (scan) {
-        // Delete the file from disk
-        const fullPath = path.resolve(scan.filePath);
-        if (fs.existsSync(fullPath)) {
-          fs.unlinkSync(fullPath);
+        // remove physical files first
+        for (const f of scan.files) {
+          const fullPath = path.resolve(f.filePath);
+          if (fs.existsSync(fullPath)) {
+            fs.unlinkSync(fullPath);
+          }
         }
+
+        // delete any scanFile records (relation is RESTRICT)
+        await prisma.scanFile.deleteMany({ where: { scanId: args.id } });
         await prisma.scan.delete({ where: { id: args.id } });
       }
       return true;
