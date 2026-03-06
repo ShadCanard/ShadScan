@@ -20,5 +20,5 @@ npx prisma migrate deploy
 # run seed script if needed
 npm run prisma:seed || true
 
-# finally exec the command given in CMD
+# finally exec the command given in CMD (defaults to start script)
 exec "$@"

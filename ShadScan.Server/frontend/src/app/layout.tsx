@@ -10,6 +10,9 @@ export const metadata: Metadata = {
   title: "Scan Manager - Gestionnaire de fichiers scannés",
   description:
     "Application de gestion de fichiers scannés : images, lettres, photographies",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({
