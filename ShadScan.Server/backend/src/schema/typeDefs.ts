@@ -122,6 +122,9 @@ export const typeDefs = gql`
 
     # Stats
     stats: Stats!
+
+    # Authors for autocompletion
+    authors: [String!]!
   }
 
   type Stats {

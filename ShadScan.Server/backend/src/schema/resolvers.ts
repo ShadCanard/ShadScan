@@ -172,6 +172,14 @@ export const resolvers = {
         })),
       };
     },
+
+    authors: async () => {
+      const rows = await prisma.scan.findMany({
+        distinct: ["author"],
+        select: { author: true },
+      });
+      return rows.map((r) => r.author);
+    },
   },
 
   Mutation: {

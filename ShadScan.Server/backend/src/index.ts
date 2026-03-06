@@ -67,7 +67,7 @@ async function startServer() {
         return;
       }
 
-      const { name, author, type, categoryId, tagIds, scanId } = req.body;
+      const { name, author, type, categoryId, tagIds, scanId, receivedAt } = req.body;
 
       // if a scanId is provided we attach the file instead of creating a new scan
       if (scanId) {
@@ -126,6 +126,7 @@ async function startServer() {
           author,
           type: type || "UNKNOWN",
           categoryId: parseInt(categoryId, 10),
+          receivedAt: receivedAt ? new Date(receivedAt) : undefined,
           tags: parsedTagIds.length
             ? { connect: parsedTagIds.map((id: number) => ({ id })) }
             : undefined,

@@ -3,8 +3,9 @@ version: '3.9'
 services:
   db:
     image: mariadb:10.11
+    env_file:
+      - .env
     environment:
-      MYSQL_ROOT_PASSWORD: example
       MYSQL_DATABASE: scan_manager
     volumes:
       - db_data:/var/lib/mysql
@@ -17,8 +18,12 @@ services:
       dockerfile: backend/Dockerfile
     depends_on:
       - db
+    env_file:
+      - .env
     environment:
-      DATABASE_URL: mysql://root:example@db:3306/scan_manager
+      # DATABASE_URL is defined in the root .env file
+      # override if necessary
+      DATABASE_URL: ${DATABASE_URL}
     ports:
       - "4000:4000"
     volumes:
@@ -29,6 +34,12 @@ services:
       # persist uploads directory
       - uploads_data:/app/uploads
     command: sh -c "npm run dev"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:4000/graphql -X POST -H 'Content-Type: application/json' -d '{\"query\":\"{__typename}\"}' || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
   frontend:
     build:
@@ -43,6 +54,12 @@ services:
       - ./frontend:/app
       - /app/node_modules
     command: sh -c "npm run dev"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/ || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
 volumes:
   db_data:

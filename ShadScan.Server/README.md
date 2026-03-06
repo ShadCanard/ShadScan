@@ -73,6 +73,14 @@ npm install
 # Éditez le fichier .env avec vos identifiants MySQL
 # DATABASE_URL="mysql://USER:PASSWORD@localhost:3306/scan_manager"
 
+## Production environment
+
+Copy `.env.example` to `.env` and set a strong random password for `MYSQL_ROOT_PASSWORD`/`DATABASE_URL`.  The `docker-compose` file
+reads this `.env` automatically and uses the same value for both the MariaDB container and the backend service.
+
+On the frontend, copy `frontend/.env.production` and adjust `NEXT_PUBLIC_API_URL`/`NEXT_PUBLIC_GRAPHQL_URL` to your host.
+
+
 # Générer le client Prisma et appliquer les migrations
 npx prisma migrate dev --name init
 

@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 async function main() {
   // Seed categories
   const categories = await Promise.all(
-    ["Courrier", "Photo de famille", "Document administratif", "Dessin", "Divers"].map(
+    ["Médecin","Travail","Personnel","Banque","Energie"].map(
       (name) =>
         prisma.category.upsert({
           where: { name },
@@ -17,7 +17,7 @@ async function main() {
 
   // Seed tags
   const tags = await Promise.all(
-    ["important", "archive", "personnel", "professionnel", "à trier", "ancien", "récent"].map(
+    ["Ordonnance","Contrat de travail","Médicaments","Facture","Relevé","Divers"].map(
       (name) =>
         prisma.tag.upsert({
           where: { name },

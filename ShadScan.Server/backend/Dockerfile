@@ -12,8 +12,8 @@ COPY backend/ ./
 # generate prisma client now that schema is present
 RUN npx prisma generate
 
-# default env, override in compose
-ENV DATABASE_URL="mysql://root:example@db:3306/scan_manager"
+# default env value can be provided via .env or compose; avoid hardcoding sensitive data
+# ENV DATABASE_URL="mysql://root:example@db:3306/scan_manager"
 
 # copy entrypoint script and make executable
 COPY backend/entrypoint.sh /usr/local/bin/entrypoint.sh

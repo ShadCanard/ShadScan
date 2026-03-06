@@ -16,10 +16,11 @@ import {
   ActionIcon,
   Modal,
   Badge,
+  Menu,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
-import { IconPlus, IconEdit, IconTrash } from "@tabler/icons-react";
+import { IconPlus, IconEdit, IconTrash, IconChevronDown } from "@tabler/icons-react";
 import {
   GET_TAGS,
   CREATE_TAG,
@@ -154,7 +155,6 @@ export default function TagsView() {
           <Table.Thead>
             <Table.Tr>
               <Table.Th>Nom</Table.Th>
-              <Table.Th>Créé le</Table.Th>
               <Table.Th style={{ width: 100 }}>Actions</Table.Th>
             </Table.Tr>
           </Table.Thead>
@@ -167,29 +167,28 @@ export default function TagsView() {
                   </Badge>
                 </Table.Td>
                 <Table.Td>
-                  <Text size="sm" c="dimmed">
-                    {formatDate(tag.createdAt)}
-                  </Text>
-                </Table.Td>
-                <Table.Td>
-                  <Group gap={4}>
-                    <ActionIcon
-                      variant="subtle"
-                      color="violet"
-                      size="sm"
-                      onClick={() => handleEdit(tag)}
-                    >
-                      <IconEdit size={14} />
-                    </ActionIcon>
-                    <ActionIcon
-                      variant="subtle"
-                      color="red"
-                      size="sm"
-                      onClick={() => handleDelete(tag)}
-                    >
-                      <IconTrash size={14} />
-                    </ActionIcon>
-                  </Group>
+                  <Menu withinPortal>
+                    <Menu.Target>
+                      <Button variant="contained" size="xs" rightSection={<IconChevronDown size={14} />}>
+                        Actions
+                      </Button>
+                    </Menu.Target>
+                    <Menu.Dropdown>
+                      <Menu.Item
+                        leftSection={<IconEdit size={14} />}
+                        onClick={() => handleEdit(tag)}
+                      >
+                        Modifier
+                      </Menu.Item>
+                      <Menu.Item
+                        leftSection={<IconTrash size={14} />}
+                        color="red"
+                        onClick={() => handleDelete(tag)}
+                      >
+                        Supprimer
+                      </Menu.Item>
+                    </Menu.Dropdown>
+                  </Menu>
                 </Table.Td>
               </Table.Tr>
             ))}

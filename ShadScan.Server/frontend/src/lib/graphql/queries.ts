@@ -2,6 +2,13 @@ import { gql } from "@apollo/client";
 
 // ============== SCAN QUERIES ==============
 
+export const GET_AUTHORS = gql`
+  query GetAuthors {
+    authors
+  }
+`;
+
+
 export const GET_SCANS = gql`
   query GetScans($page: Int, $pageSize: Int, $filter: ScanFilterInput) {
     scans(page: $page, pageSize: $pageSize, filter: $filter) {
@@ -84,6 +91,7 @@ export const GET_SCAN_FILES = gql`
       fileName
       mimeType
       fileSize
+      createdAt
     }
   }
 `;
