@@ -1,0 +1,14 @@
+# ignore node modules and build artifacts from all packages
+**/node_modules
+**/.next
+
+# don't send uploaded files (folder is created in container)
+backend/uploads/*
+!backend/uploads/.dockerkeep
+
+# misc
+.dockerignore
+.git
+.gitignore
+npm-debug.log
+.env
