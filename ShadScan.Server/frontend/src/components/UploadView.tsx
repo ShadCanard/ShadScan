@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useMutation } from "@apollo/client";
 import { graphqlQuery } from "@/lib/graphql-client";
 import {
   Card,
@@ -11,6 +12,7 @@ import {
   TextInput,
   Select,
   MultiSelect,
+  Autocomplete,
   Button,
   Group,
   Progress,
@@ -23,7 +25,7 @@ import {
 import { Dropzone, IMAGE_MIME_TYPE } from "@mantine/dropzone";
 import { notifications } from "@mantine/notifications";
 import { IconUpload, IconPhoto, IconX, IconTrash, IconFileTypePdf } from "@tabler/icons-react";
-import { GET_CATEGORIES, GET_TAGS, CREATE_SCAN, GET_SCAN_LIST } from "@/lib/graphql/queries";
+import { GET_CATEGORIES, GET_TAGS, CREATE_SCAN, GET_SCAN_LIST, CREATE_CATEGORY, CREATE_TAG, GET_AUTHORS } from "@/lib/graphql/queries";
 import type { Category, Tag, ScanType } from "@/types";
 import { SCAN_TYPE_LABELS } from "@/types";
 import { formatFileSize } from "@/lib/utils";
@@ -51,6 +53,12 @@ interface FileToUpload {
 export default function UploadView() {
   const [files, setFiles] = useState<FileToUpload[]>([]);
   const [author, setAuthor] = useState("");
+
+  // fetch authors for autocomplete
+  const { data: authorsData } = useQuery<{ authors: string[] }, Error>({
+    queryKey: ["authors"],
+    queryFn: () => graphqlQuery<{ authors: string[] }>(GET_AUTHORS),
+  });
   const [receivedAt, setReceivedAt] = useState("");
   const [type, setType] = useState<string>("UNKNOWN");
   const [categoryId, setCategoryId] = useState<string>("");
@@ -72,15 +80,43 @@ export default function UploadView() {
     queryFn: () => graphqlQuery<{ scans: { scans: { id: number; name: string }[] } }>(GET_SCAN_LIST),
   });
 
-  const categoryOptions = (categoriesData?.categories ?? []).map((c) => ({
-    value: String(c.id),
-    label: c.name,
-  }));
+  const [createCategory] = useMutation(CREATE_CATEGORY, {
+    onCompleted: (data) => {
+      const cat = data.createCategory;
+      setCategoryOptions((prev) => [...prev, { value: String(cat.id), label: cat.name }]);
+      setCategoryId(String(cat.id));
+    },
+  });
 
-  const tagOptions = (tagsData?.tags ?? []).map((t) => ({
-    value: String(t.id),
-    label: t.name,
-  }));
+  const [createTag] = useMutation(CREATE_TAG, {
+    onCompleted: (data) => {
+      const tag = data.createTag;
+      setTagOptions((prev) => [...prev, { value: String(tag.id), label: tag.name }]);
+      setTagIds((prev) => [...prev, String(tag.id)]);
+    },
+  });
+
+  const [categoryOptions, setCategoryOptions] = useState<{ value: string; label: string }[]>(
+    (categoriesData?.categories ?? []).map((c) => ({ value: String(c.id), label: c.name }))
+  );
+
+  const [tagOptions, setTagOptions] = useState<{ value: string; label: string }[]>(
+    (tagsData?.tags ?? []).map((t) => ({ value: String(t.id), label: t.name }))
+  );
+
+  // keep options in sync when data loads/refetches
+  useEffect(() => {
+    if (categoriesData?.categories) {
+      setCategoryOptions(
+        categoriesData.categories.map((c) => ({ value: String(c.id), label: c.name }))
+      );
+    }
+  }, [categoriesData]);
+  useEffect(() => {
+    if (tagsData?.tags) {
+      setTagOptions(tagsData.tags.map((t) => ({ value: String(t.id), label: t.name })));
+    }
+  }, [tagsData]);
 
   const handleDrop = useCallback((acceptedFiles: File[]) => {
     const newFiles = acceptedFiles.map((file) => ({
@@ -101,6 +137,29 @@ export default function UploadView() {
   };
 
   const handleUpload = async () => {
+    // ensure category/tag existence before uploading
+    if (!existingScanId) {
+      if (categoryId === "") {
+        notifications.show({ title: "Erreur", message: "Catégorie invalide", color: "red" });
+        return;
+      }
+      // check category exists, otherwise create it
+      if (!categoryOptions.find((c) => c.value === categoryId)) {
+        const res = await createCategory({ variables: { input: { name: categoryId } } });
+        const newId = String(res.data.createCategory.id);
+        setCategoryId(newId);
+      }
+
+      // ensure tags exist
+      for (let i = 0; i < tagIds.length; i++) {
+        const t = tagIds[i];
+        if (!tagOptions.find((opt) => opt.value === t)) {
+          const res = await createTag({ variables: { input: { name: t } } });
+          const newId = String(res.data.createTag.id);
+          setTagIds((prev) => prev.map((x) => (x === t ? newId : x)));
+        }
+      }
+    }
     if (files.length === 0) {
       notifications.show({
         title: "Champs requis",
@@ -293,11 +352,12 @@ export default function UploadView() {
             onChange={(val) => setExistingScanId(val || "")}
             clearable
           />
-          <TextInput
+          <Autocomplete
             label="Auteur"
             placeholder="Nom de l'auteur"
             value={author}
-            onChange={(e) => setAuthor(e.currentTarget.value)}
+            onChange={setAuthor}
+            data={authorsData?.authors ?? []}
             required={!existingScanId}
             disabled={!!existingScanId}
           />

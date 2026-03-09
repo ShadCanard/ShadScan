@@ -1,14 +1,13 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Windows.ApplicationModel.Background;
 
 namespace ShadScan.Client.Models
 {
     [Serializable]
     public class ScanFile
     {
+        [JsonProperty("uploadedId")]
+        public Guid uploadedId { get; set; }
+
         [JsonProperty("pageNumber")]
         public int PageNumber { get; set; }
 

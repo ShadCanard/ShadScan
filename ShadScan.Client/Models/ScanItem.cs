@@ -1,10 +1,5 @@
 ﻿using Newtonsoft.Json;
 using ShadDev.Core.NET.Infrastructure.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
-using System.Text.Json.Serialization;
 using System.Windows.Media.Imaging;
 using JsonIgnoreAttribute = Newtonsoft.Json.JsonIgnoreAttribute;
 

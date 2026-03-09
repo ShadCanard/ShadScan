@@ -1,12 +1,7 @@
-﻿using MahApps.Metro.Controls;
-using ShadDev.Core.NET.Infrastructure;
+﻿using ShadDev.Core.NET.Infrastructure;
 using ShadDev.Core.NET.Infrastructure.Hamburger;
 using ShadScan.Client.Pages;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Text;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace ShadScan.Client.Models
 {

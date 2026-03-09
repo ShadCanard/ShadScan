@@ -139,9 +139,9 @@ namespace ShadScan.Client.Fragments.Scan
             int cpt = 0;
             BitmapEncoder encoder = new PngBitmapEncoder();
             encoder.Frames.Add(BitmapFrame.Create(_bitmap));
-            if(!Directory.Exists(outputPath)) Directory.CreateDirectory(outputPath);
+            if (!Directory.Exists(outputPath)) Directory.CreateDirectory(outputPath);
 
-            while(File.Exists(outputFile))
+            while (File.Exists(outputFile))
             {
                 cpt++;
                 outputFile = Path.Combine(outputPath, $"scan_{DateTime.Now:yyyyMMdd_HHmmss}_{cpt}.png");
@@ -155,9 +155,10 @@ namespace ShadScan.Client.Fragments.Scan
                 Path = outputFile
             };
 
-            Instance.GetInstance().GetRepository<ScanItem>().Add(new ScanItem() { 
-                CreationTime = DateTime.Now, 
-                Name = $"scan_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.png", 
+            Instance.GetInstance().GetRepository<ScanItem>().Add(new ScanItem()
+            {
+                CreationTime = DateTime.Now,
+                Name = $"scan_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.png",
                 Files = [.. (new List<ScanFile> { scanFile })],
                 Type = ImageType.UNKNOWN,
             });

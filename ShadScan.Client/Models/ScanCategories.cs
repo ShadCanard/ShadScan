@@ -1,8 +1,5 @@
 ﻿using Newtonsoft.Json;
 using ShadDev.Core.NET.Infrastructure.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ShadScan.Client.Models
 {

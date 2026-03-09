@@ -1,18 +1,7 @@
 ﻿using ShadScan.Client.Infrastructure;
 using ShadScan.Client.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace ShadScan.Client.Fragments.Library
 {
@@ -131,7 +120,7 @@ namespace ShadScan.Client.Fragments.Library
         {
             ContentFilter filter = (ContentFilter)cbTreeViewType.SelectedItem;
             var selectedItem = (tvItem.SelectedItem as TreeViewItem)?.Header?.ToString();
-            if(selectedItem == null) Instance.GetInstance().GetFragment<MainLibraryFragment>().SetMainContent<ViewLibraryFragment>();
+            if (selectedItem == null) Instance.GetInstance().GetFragment<MainLibraryFragment>().SetMainContent<ViewLibraryFragment>();
             Instance.GetInstance().GetFragment<MainLibraryFragment>().SetMainContent<ViewLibraryFragment>(filter, selectedItem);
 
         }

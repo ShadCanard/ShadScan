@@ -1,20 +1,11 @@
-﻿using ShadScan.Client.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using ShadDev.Core.NET.Infrastructure;
+using ShadScan.Client.Infrastructure.Adorners;
+using ShadScan.Client.Models;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Linq;
-using System.Windows.Documents;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using ShadDev.Core.NET.Infrastructure;
-using ShadScan.Client.Infrastructure.Adorners;
 
 namespace ShadScan.Client.Fragments.Library
 {
@@ -56,7 +47,7 @@ namespace ShadScan.Client.Fragments.Library
 
         private void LoadContent()
         {
-            
+
             List<ScanItem> items = Instance.GetInstance().GetRepository<ScanItem>().List();
             switch (_filter)
             {
@@ -258,7 +249,7 @@ namespace ShadScan.Client.Fragments.Library
 
             int targetLastPageNumber = target.Files != null && target.Files.Count > 0 ? target.Files.Max(f => f.PageNumber) : 0;
             var files = source.Files.ToList();
-            if(target.Files == null)
+            if (target.Files == null)
             {
                 target.Files = [];
             }
@@ -323,7 +314,7 @@ namespace ShadScan.Client.Fragments.Library
                 .Add(
                     Instance
                     .GetInstance()
-                    .GetFragment<MainLibraryFragment>(), 
+                    .GetFragment<MainLibraryFragment>(),
                     nameof(MainLibraryFragment)
                 );
             Instance

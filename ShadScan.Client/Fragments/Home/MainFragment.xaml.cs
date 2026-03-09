@@ -23,10 +23,11 @@ namespace ShadScan.Client.Fragments.Home
             using var scanningContext = new ScanningContext(new WpfImageContext());
             var devices = await ScannerInstance.GetInstance().GetScannersAsync();
             var scanCount = Instance.GetInstance().GetRepository<ScanItem>().List().Count;
+            var res = await new GraphQLClient().GetStatsAsync();
             await Dispatcher.BeginInvoke(() =>
             {
                 txtStats.Text =
-                    $"Nombre de scanners trouvés = {devices.Count}{Environment.NewLine}Nombre de fichiers scannés = {scanCount}";
+                    $"Nombre de scanners trouvés = {devices.Count}{Environment.NewLine}Nombre de fichiers scannés = {scanCount}. Nombre de scans en ligne = {res.stats.TotalScans}";
             });
         }
     }

@@ -1,9 +1,5 @@
-﻿using ShadDev.Core.NET.Infrastructure;
-using ShadScan.Client.Infrastructure;
+﻿using ShadScan.Client.Infrastructure;
 using ShadScan.Client.Models;
-using System.ComponentModel;
-using System.Configuration;
-using System.Data;
 using System.Windows;
 
 namespace ShadScan.Client
@@ -22,7 +18,7 @@ namespace ShadScan.Client
                 .CreateRepository<ScanItem>()
                 .UseConsoleCommand(false)
                 .Init(this);
-            
+
             base.OnStartup(e);
         }
     }

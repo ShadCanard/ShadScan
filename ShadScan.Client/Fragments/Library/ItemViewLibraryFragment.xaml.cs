@@ -1,19 +1,10 @@
 ﻿using ShadScan.Client.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing.Printing;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media.Imaging;
 
 namespace ShadScan.Client.Fragments.Library
 {
@@ -147,7 +138,7 @@ namespace ShadScan.Client.Fragments.Library
 
         }
 
-        
+
         /// <summary>
         /// Occurs when a property value changes.
         /// </summary>
@@ -166,7 +157,7 @@ namespace ShadScan.Client.Fragments.Library
 
         private void OnPreviousClick(object sender, RoutedEventArgs e)
         {
-            if(!IsFirstPage)
+            if (!IsFirstPage)
             {
                 CurrentPage--;
                 CurrentImage = Item?.Files?.FirstOrDefault(f => f.PageNumber == CurrentPage)?.Path?.LoadImageFromFile();
@@ -177,7 +168,7 @@ namespace ShadScan.Client.Fragments.Library
         {
             string? filePath = Item?.Files?.FirstOrDefault(f => f.PageNumber == CurrentPage)?.Path;
 
-            if ( Item == null || Item.Files == null || Item.Files.Count == 0 || string.IsNullOrWhiteSpace(filePath)) return;
+            if (Item == null || Item.Files == null || Item.Files.Count == 0 || string.IsNullOrWhiteSpace(filePath)) return;
             Process.Start("explorer.exe", Item?.Files?.First(f => f.PageNumber == CurrentPage)?.Path);
         }
         private void OnPrintClick(object sender, RoutedEventArgs e)
@@ -220,7 +211,7 @@ namespace ShadScan.Client.Fragments.Library
 
         private void OnNextClick(object sender, RoutedEventArgs e)
         {
-            if(!IsLastPage)
+            if (!IsLastPage)
             {
                 CurrentPage++;
                 CurrentImage = Item?.Files?.FirstOrDefault(f => f.PageNumber == CurrentPage)?.Path?.LoadImageFromFile();
