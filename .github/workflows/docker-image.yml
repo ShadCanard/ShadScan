@@ -21,6 +21,6 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: ./ShadScan.Server
-          file: ./ShadScan.Server/backend/Dockerfile
+          file: ./ShadScan.Server/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/nom-de-l-image:latest
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/shadscan:latest

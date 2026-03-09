@@ -20,5 +20,15 @@ npx prisma migrate deploy
 # run seed script if needed
 npm run prisma:seed || true
 
-# finally exec the command given in CMD (defaults to start script)
-exec "$@"
+# after migrations, start both backend and frontend together
+
+# run backend in background then frontend in foreground
+# note: CMD may specify the backend start command but we handle both explicitly
+
+# start backend
+cd /app/backend
+npm run start &
+
+# start frontend (will keep container running)
+cd /app/frontend
+npm run start
