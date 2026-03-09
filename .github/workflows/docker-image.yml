@@ -20,7 +20,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
         with:
-          context: ./ShadScan.Server/backend
+          context: ./ShadScan.Server
           file: ./ShadScan.Server/backend/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/nom-de-l-image:latest
